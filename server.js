@@ -93,7 +93,7 @@ app.post('/api/flights', async (req, res) => {
     const { from, to, dateDep, dateArr, directOnly } = req.body;
     console.log("Datos recibidos del frontend:", { from, to, dateDep, dateArr });
 
-    const apiKey = '0559f7141627d92d53bce86a93ab73a1c6083646ea16597fb9375a9df6cd1e25';
+    const apiKey = process.env.SERPAPI_API_KEY;
     let url = `https://serpapi.com/search?engine=google_flights&departure_id=${from}&arrival_id=${to}&outbound_date=${dateDep}&return_date=${dateArr}&api_key=${apiKey}`;
 
     if (directOnly) {
