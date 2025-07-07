@@ -83,68 +83,52 @@ selectDesde.addEventListener('change', function () {
     tempId = selectedId; // Guardar el ID temporalmente
 });
 
-selectHasta.addEventListener('change', function () {
-    const selectedId = this.value;
-    const selectedName = this.options[this.selectedIndex].text;
-    if (!selectedId || destinosSeleccionados.has(selectedId)) return;
-
-    destinosSeleccionados.add({ IATA: selectedId, nombre: selectedName });
-
-    // Deshabilitar la opción seleccionada
-    const optionToDisable = Array.from(this.options).find(opt => opt.value === selectedId);
-    if (optionToDisable) {
-        optionToDisable.disabled = true;
-    }
-
-    const optionToDisableDesde = Array.from(selectDesde.options).find(opt => opt.value === selectedId);
-    if (optionToDisableDesde) {
-        optionToDisableDesde.disabled = true;
-    }
-    // Volver a mostrar la opción placeholder
-    console.log("Destinos seleccionados:", Array.from(destinosSeleccionados));
-});
-
 const chipsContainer = document.getElementById('chipsContainer');
 
 selectHasta.addEventListener('change', function () {
     const selectedId = this.value;
-    if (!selectedId || destinosSeleccionados.has(selectedId)) return;
+    const selectedOption = this.options[this.selectedIndex];
+    const selectedName = selectedOption.text;
 
-    destinosSeleccionados.add(selectedId);
+    // Verifica si ya está en la lista
+    if (!selectedId || Array.from(destinosSeleccionados).some(d => d.IATA === selectedId)) return;
 
-    // Deshabilitar la opción en el select
-    const optionToDisable = this.querySelector(`option[value="${selectedId}"]`);
-    if (optionToDisable) {
-        optionToDisable.disabled = true;
-    }
+    // Agrega el aeropuerto a la lista como objeto
+    destinosSeleccionados.add({ IATA: selectedId, nombre: selectedName });
 
-    const optionToDisableDesde = selectDesde.querySelector(`option[value="${selectedId}"]`);
-    if (optionToDisableDesde) {
-        optionToDisableDesde.disabled = true;
-    }
-    // Mostrar chip
-    const aeropuerto = aeropuertos.find(a => a.id === selectedId);
+    // Deshabilita en ambos selects
+    selectedOption.disabled = true;
+
+    const optionDesde = selectDesde.querySelector(`option[value="${selectedId}"]`);
+    if (optionDesde) optionDesde.disabled = true;
+
+    // Crea y muestra el chip
     const chip = document.createElement('div');
     chip.className = 'chip';
     chip.setAttribute('data-id', selectedId);
     chip.innerHTML = `
-        ${aeropuerto.nombre}
+        ${selectedName}
         <span class="remove-btn">&times;</span>
     `;
     chipsContainer.appendChild(chip);
 
-    // Evento para eliminar chip
+    // Evento para quitar el chip
     chip.querySelector('.remove-btn').addEventListener('click', () => {
         chip.remove();
-        destinosSeleccionados.delete(selectedId);
 
-        // Rehabilitar opción en el select
-        if (optionToDisable) {
-            optionToDisable.disabled = false;
-            optionToDisableDesde.disabled = false;
-        }
+        // Quitar del Set usando reemplazo manual del objeto
+        destinosSeleccionados.forEach(item => {
+            if (item.IATA === selectedId) destinosSeleccionados.delete(item);
+        });
+
+        // Rehabilitar en los selects
+        selectedOption.disabled = false;
+        if (optionDesde) optionDesde.disabled = false;
     });
 
-    // Resetear el select al placeholder
+    // Resetear selección al placeholder
     this.value = "";
+
+    // Para debug: mostrar todos los objetos correctamente
+    console.log("Destinos seleccionados:", Array.from(destinosSeleccionados));
 });
