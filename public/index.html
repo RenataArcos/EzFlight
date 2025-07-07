@@ -63,10 +63,6 @@
             top: 8px;
             right: 6px;
         }
-
-        .select2-selection--multiple .select2-search__field {
-            width: 100% !important;
-        }
     </style>
 </head>
 
@@ -86,8 +82,8 @@
 
                     <div class="col-md-6">
                         <label for="selectHasta" class="form-label">Destino(s)</label>
-                        <select class="form-select" id="selectHasta" multiple>
-                            <!-- múltiples destinos -->
+                        <select class="form-select" id="selectHasta">
+                            <option disabled selected>Selecciona un aeropuerto</option>
                         </select>
                     </div>
 
@@ -135,7 +131,6 @@
 
             $('#selectHasta').select2({
                 placeholder: "Selecciona uno o más destinos",
-                multiple: true,
                 width: '100%'
             });
         });

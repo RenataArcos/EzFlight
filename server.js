@@ -6,6 +6,8 @@ const neo4j = require('neo4j-driver');
 const app = express();
 app.use(cors());
 app.use(express.json());
+const path = require('path')
+app.use('/', express.static(path.join(__dirname, 'public')))
 
 // Configuración del driver de Neo4j
 const driver = neo4j.driver(
