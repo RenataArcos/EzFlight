@@ -60,3 +60,91 @@ function poblarSelectAeropuertos(lista, selectId) {
 
 poblarSelectAeropuertos(aeropuertos, 'selectDesde');
 poblarSelectAeropuertos(aeropuertos, 'selectHasta');
+
+const destinosSeleccionados = new Set();
+
+const selectHasta = document.getElementById('selectHasta');
+const selectDesde = document.getElementById('selectDesde');
+let tempId = "";
+
+selectDesde.addEventListener('change', function () {
+    const selectedId = this.value;
+    if (tempId !== "") {
+        // Rehabilitar la opción previamente seleccionada
+        const optionToRehabilitate = Array.from(selectHasta.options).find(opt => opt.value === tempId);
+        if (optionToRehabilitate) {
+            optionToRehabilitate.disabled = false;
+        }
+    }
+    const optionToDisable = Array.from(selectHasta.options).find(opt => opt.value === selectedId);
+    if (optionToDisable) {
+        optionToDisable.disabled = !destinosSeleccionados.has(selectedId);
+    }
+    tempId = selectedId; // Guardar el ID temporalmente
+});
+
+selectHasta.addEventListener('change', function () {
+    const selectedId = this.value;
+    const selectedName = this.options[this.selectedIndex].text;
+    if (!selectedId || destinosSeleccionados.has(selectedId)) return;
+
+    destinosSeleccionados.add({ IATA: selectedId, nombre: selectedName });
+
+    // Deshabilitar la opción seleccionada
+    const optionToDisable = Array.from(this.options).find(opt => opt.value === selectedId);
+    if (optionToDisable) {
+        optionToDisable.disabled = true;
+    }
+
+    const optionToDisableDesde = Array.from(selectDesde.options).find(opt => opt.value === selectedId);
+    if (optionToDisableDesde) {
+        optionToDisableDesde.disabled = true;
+    }
+    // Volver a mostrar la opción placeholder
+    console.log("Destinos seleccionados:", Array.from(destinosSeleccionados));
+});
+
+const chipsContainer = document.getElementById('chipsContainer');
+
+selectHasta.addEventListener('change', function () {
+    const selectedId = this.value;
+    if (!selectedId || destinosSeleccionados.has(selectedId)) return;
+
+    destinosSeleccionados.add(selectedId);
+
+    // Deshabilitar la opción en el select
+    const optionToDisable = this.querySelector(`option[value="${selectedId}"]`);
+    if (optionToDisable) {
+        optionToDisable.disabled = true;
+    }
+
+    const optionToDisableDesde = selectDesde.querySelector(`option[value="${selectedId}"]`);
+    if (optionToDisableDesde) {
+        optionToDisableDesde.disabled = true;
+    }
+    // Mostrar chip
+    const aeropuerto = aeropuertos.find(a => a.id === selectedId);
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.setAttribute('data-id', selectedId);
+    chip.innerHTML = `
+        ${aeropuerto.nombre}
+        <span class="remove-btn">&times;</span>
+    `;
+    chipsContainer.appendChild(chip);
+
+    // Evento para eliminar chip
+    chip.querySelector('.remove-btn').addEventListener('click', () => {
+        chip.remove();
+        destinosSeleccionados.delete(selectedId);
+
+        // Rehabilitar opción en el select
+        if (optionToDisable) {
+            optionToDisable.disabled = false;
+            optionToDisableDesde.disabled = false;
+        }
+    });
+
+    // Resetear el select al placeholder
+    this.value = "";
+});
