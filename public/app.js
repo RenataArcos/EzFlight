@@ -26,12 +26,16 @@ document.getElementById('flightForm').addEventListener('submit', async function 
     const directOnly = document.getElementById('flexSwitchCheckDefault').checked;
     const to = Array.from(destinosSeleccionados);
 
+    const resultDiv = document.getElementById('results');
+    resultDiv.innerHTML = ""; // Limpia resultados anteriores
+
     if (!to.length) {
         alert("Selecciona al menos un destino");
         return;
     }
 
     try {
+        // Paso 1: Insertar vuelos
         const response = await fetch('http://localhost:3000/api/flights', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -40,8 +44,25 @@ document.getElementById('flightForm').addEventListener('submit', async function 
 
         const data = await response.json();
         console.log(data);
+
+        const tspResponse = await fetch('http://localhost:3000/api/tsp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from, destinations: to })
+        });
+
+        const tspData = await tspResponse.json();
+        console.log("TSP Result:", tspData);
+
+        const resultDiv = document.getElementById('results');
+        if (tspData.bestPath) {
+            resultDiv.innerHTML += `<h4>Ruta óptima completa:</h4> <p class="text-primary">${tspData.bestPath.join(" → ")}</p> <p><strong>Costo total:</strong> $${tspData.totalCost.toFixed(2)}</p>;`
+        } else {
+            resultDiv.innerHTML += `<p class="text-danger">No se pudo calcular una ruta completa óptima.</p>;`
+        }
+
     } catch (error) {
-        document.getElementById('results').innerHTML = '<p class="text-danger text-center">Error al buscar vuelos.</p>';
+        resultDiv.innerHTML = '<p class="text-danger text-center">Error al buscar vuelos.</p>';
         console.error(error);
     }
 });
@@ -124,6 +145,7 @@ selectHasta.addEventListener('change', function () {
         // Rehabilitar en los selects
         selectedOption.disabled = false;
         if (optionDesde) optionDesde.disabled = false;
+        console.log("Destinos seleccionados:", Array.from(destinosSeleccionados));
     });
 
     // Resetear selección al placeholder
