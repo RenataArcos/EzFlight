@@ -56,7 +56,7 @@ document.getElementById('flightForm').addEventListener('submit', async function 
 
         const resultDiv = document.getElementById('results');
         if (tspData.bestPath) {
-            resultDiv.innerHTML += `<h4>Ruta óptima completa:</h4> <p class="text-primary">${tspData.bestPath.join(" → ")}</p> <p><strong>Costo total:</strong> $${tspData.totalCost.toFixed(2)}</p>;`
+            resultDiv.appendChild(renderTspResult(tspData));
         } else {
             resultDiv.innerHTML += `<p class="text-danger">No se pudo calcular una ruta completa óptima.</p>;`
         }
@@ -154,3 +154,43 @@ selectHasta.addEventListener('change', function () {
     // Para debug: mostrar todos los objetos correctamente
     console.log("Destinos seleccionados:", Array.from(destinosSeleccionados));
 });
+
+function renderTspResult({ bestPath, totalCost }) {
+    // card contenedor
+    const card = document.createElement('div');
+    card.className = 'card shadow-sm p-4 mt-4 fade-in';
+
+    // título
+    card.innerHTML = `
+      <h4 class="fw-bold text-center text-primary mb-3">
+        Ruta óptima
+      </h4>
+    `;
+
+    // timeline
+    const timeline = document.createElement('div');
+    timeline.className = 'result-timeline justify-content-center';
+    bestPath.forEach((code, idx) => {
+        // nodo (aeropuerto)
+        const badge = document.createElement('span');
+        badge.className = 'badge rounded-pill';
+        badge.textContent = code;
+        timeline.appendChild(badge);
+
+        // flecha entre nodos
+        if (idx < bestPath.length - 1) {
+            const arrow = document.createElement('i');
+            arrow.className = 'fa-solid fa-arrow-right-long';
+            timeline.appendChild(arrow);
+        }
+    });
+    card.appendChild(timeline);
+
+    // costo total
+    const cost = document.createElement('p');
+    cost.className = 'fs-5 fw-medium text-center mt-3 mb-0';
+    cost.innerHTML = `<strong>Costo total:</strong> $${totalCost.toLocaleString('es-CL')}`;
+    card.appendChild(cost);
+
+    return card;      // devuelve el nodo listo para insertar
+}
